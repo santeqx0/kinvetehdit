@@ -12,7 +12,7 @@ const projects: Project[] = [
     tags: ['React', 'Node.js', 'MongoDB', 'Express'],
     image: 'https://images.pexels.com/photos/6214476/pexels-photo-6214476.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
     github: 'https://github.com/hasbutcu',
-    link: 'https://oxyinc.xyz'
+    link: 'https://kinvetehdit.com'
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ const projects: Project[] = [
     tags: ['React', 'TypeScript', 'Firebase', 'Tailwind'],
     image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyicNHJ0GT4efJIGeevQktZ18L_Q0FzRlesg&s',
     github: 'https://github.com/hasbutcu',
-    link: 'https://oxyinc.xyz'
+    link: 'https://kinvetehdit.com'
   },
   {
     id: 3,
@@ -30,7 +30,7 @@ const projects: Project[] = [
     tags: ['JavaScript', 'API Integration', 'CSS'],
     image: 'https://images.pexels.com/photos/1118873/pexels-photo-1118873.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
     github: 'https://github.com/hasbutcu',
-    link: 'https://oxyinc.xyz'
+    link: 'https://kinvetehdit.com'
   },
   {
     id: 4,
@@ -39,7 +39,7 @@ const projects: Project[] = [
     tags: ['React', 'Next.js', 'PostgreSQL', 'WebSockets'],
     image: 'https://images.pexels.com/photos/607812/pexels-photo-607812.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
     github: 'https://github.com/hasbutcu',
-    link: 'https://oxyinc.xyz'
+    link: 'https://kinvetehdit.com'
   },
   {
     id: 5,
@@ -48,7 +48,7 @@ const projects: Project[] = [
     tags: ['React Native', 'TypeScript', 'GraphQL'],
     image: 'https://images.pexels.com/photos/3622517/pexels-photo-3622517.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
     github: 'https://github.com/hasbutcu',
-    link: 'https://oxyinc.xyz'
+    link: 'https://kinvetehdit.com'
   },
   {
     id: 6,
@@ -57,7 +57,7 @@ const projects: Project[] = [
     tags: ['React', 'Redux', 'API Integration'],
     image: 'https://images.pexels.com/photos/918281/pexels-photo-918281.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
     github: 'https://github.com/hasbutcu',
-    link: 'https://oxyinc.xyz'
+    link: 'https://kinvetehdit.com'
   }
 ];
 

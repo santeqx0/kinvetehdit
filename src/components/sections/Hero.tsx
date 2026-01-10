@@ -182,7 +182,7 @@ const Hero: React.FC = () => {
               <div className="pt-24 pb-5">
                 <div className="flex items-baseline gap-2 mb-3">
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {discordUser?.username || 'username'}
+                    {discordUser?.username || 'Sante'}
                   </h1>
                 </div>
 
