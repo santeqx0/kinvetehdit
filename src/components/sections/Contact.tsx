@@ -184,7 +184,7 @@ const Contact: React.FC = () => {
             {/* Map or Illustration */}
             <div className="relative h-64 overflow-hidden rounded-lg">
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d195884.30043145744!2d32.59795774239392!3d39.90352329781131!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d347d520732db1%3A0xbdc57b0c0842b8d!2sAnkara!5e0!3m2!1str!2str!4v1745762360239!5m2!1str!2str" 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d130288.19276533287!2d28.865157058093104!3d41.01384004407009!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab53c5e1c1cff%3A0x1c5d27b38d3f729!2sIstanbul%2C%20Turkey!5e0!3m2!1str!2str!4v1745779999999!5m2!1str!2str" 
                 width="100%" 
                 height="100%" 
                 style={{ border: 0 }} 
