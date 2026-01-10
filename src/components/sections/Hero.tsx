@@ -268,7 +268,7 @@ const Hero: React.FC = () => {
                   <h3 className="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">CONNECTIONS</h3>
                   <div className="flex flex-wrap gap-3">
                     <motion.a
-                      href="https://github.com"
+                      href="https://github.com/santeqx0"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 px-3 py-2 text-gray-700 transition-colors bg-gray-100 rounded-md dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600"
@@ -279,7 +279,7 @@ const Hero: React.FC = () => {
                       <span className="text-sm font-medium">GitHub</span>
                     </motion.a>
                     <motion.a
-                      href="https://twitter.com"
+                      href="https://x.com/kinvetehdit"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 px-3 py-2 text-gray-700 transition-colors bg-gray-100 rounded-md dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600"
@@ -290,7 +290,7 @@ const Hero: React.FC = () => {
                       <span className="text-sm font-medium">Twitter</span>
                     </motion.a>
                     <motion.a
-                      href="https://instagram.com/hs.kalite"
+                      href="https://instagram.com/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 px-3 py-2 text-gray-700 transition-colors bg-gray-100 rounded-md dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600"
