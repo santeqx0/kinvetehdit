@@ -62,7 +62,7 @@ const NavBar: React.FC = () => {
           whileHover={{ scale: 1.05 }}
           data-hover
         >
-          oxyinc.xyz
+          kinvetehdit.com
         </motion.div>
         
         {/* Desktop Navigation */}

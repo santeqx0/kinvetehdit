@@ -56,7 +56,7 @@ const About: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <p className="text-gray-700 dark:text-gray-300">
-              Ben, React, TypeScript ve Tailwind CSS gibi modern teknolojileri kullanarak duyarlı, kullanıcı dostu web uygulamaları geliştirme konusunda uzmanım.
+              Ben, Sante, TypeScript ve Tailwind CSS gibi modern teknolojileri kullanarak duyarlı, kullanıcı dostu web uygulamaları geliştirme konusunda uzmanım.
             </p>
             <p className="text-gray-700 dark:text-gray-300">
               Boş zamanlarımda yeni teknolojileri keşfetmeyi, açık kaynak projelere katkıda bulunmayı veya geliştirme becerilerimi geliştirmek için tasarım ilkeleri hakkında bilgi edinmeyi seviyorum.

@@ -258,7 +258,7 @@ const Hero: React.FC = () => {
                       @By
                     </span>
                     <span className="px-2 py-1 text-xs font-medium rounded-md" style={{ backgroundColor: 'rgba(87, 242, 135, 0.2)', color: 'rgb(87, 242, 135)' }}>
-                      @Oxy
+                      @Sante
                     </span>
                   </div>
                 </div>
@@ -420,21 +420,21 @@ const Hero: React.FC = () => {
                         Şu anda
                       </span>
                     </div>
-                    <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">ABC Technology | 2022 - Günümüz</p>
+                    <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">ABC Technology | 2026 - Günümüz</p>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
                       Modern web uygulamaları geliştirme, performans optimizasyonu ve ekip liderliği.
                     </p>
                   </div>
                   <div className="pl-4 border-l-2 border-gray-300 dark:border-gray-700">
                     <h4 className="mb-1 font-medium text-gray-900 dark:text-white">Frontend Developer</h4>
-                    <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">XYZ Solutions | 2020 - 2022</p>
+                    <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">XYZ Solutions | 2020 - 2026</p>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
                       React tabanlı kullanıcı arayüzleri geliştirme ve API entegrasyonları.
                     </p>
                   </div>
                   <div className="pl-4 border-l-2 border-gray-300 dark:border-gray-700">
                     <h4 className="mb-1 font-medium text-gray-900 dark:text-white">Junior Web Developer</h4>
-                    <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">Tech Startup | 2018 - 2020</p>
+                    <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">Tech Startup | 2018 - 2026</p>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
                       Web uygulamaları geliştirme ve UI/UX tasarımı.
                     </p>

@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               data-hover
             >
-              oxyinc.xyz
+              kinvetehdit.com
             </motion.div>
             
             <div className="flex flex-wrap justify-center gap-6">
@@ -107,7 +107,7 @@ const Footer: React.FC = () => {
             </div>
             
             <p className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              &copy; {currentYear} Oxy. Made with 
+              &copy; {currentYear} Sante. Made with 
               <Heart size={14} className="mx-1 text-red-500" />
               All rights reserved.
             </p>

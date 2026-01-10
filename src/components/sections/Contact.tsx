@@ -112,7 +112,7 @@ const Contact: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-base font-medium text-gray-900 dark:text-white">Email</h4>
-                    <p className="text-gray-600 dark:text-gray-400">contact@example.com</p>
+                    <p className="text-gray-600 dark:text-gray-400">viskibedel@gmail.com</p>
                   </div>
                 </div>
                 
@@ -132,7 +132,7 @@ const Contact: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-base font-medium text-gray-900 dark:text-white">Adres</h4>
-                    <p className="text-gray-600 dark:text-gray-400">Ankara</p>
+                    <p className="text-gray-600 dark:text-gray-400">İstanbul</p>
                   </div>
                 </div>
               </div>
@@ -144,7 +144,7 @@ const Contact: React.FC = () => {
               
               <div className="flex space-x-4">
                 <motion.a 
-                  href="https://github.com/hasbutcu" 
+                  href="https://github.com/santeqx0" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="p-3 text-gray-700 transition-colors bg-gray-100 rounded-full dark:bg-slate-800 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400"
@@ -156,7 +156,7 @@ const Contact: React.FC = () => {
                 </motion.a>
                 
                 <motion.a 
-                  href="https://twitter.com/realyryoxi" 
+                  href="https://x.com/kinvetehdit" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="p-3 text-gray-700 transition-colors bg-gray-100 rounded-full dark:bg-slate-800 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400"
@@ -168,7 +168,7 @@ const Contact: React.FC = () => {
                 </motion.a>
                 
                 <motion.a 
-                  href="https://instagram.com/hasbutcu" 
+                  href="https://instagram.com/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="p-3 text-gray-700 transition-colors bg-gray-100 rounded-full dark:bg-slate-800 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400"
