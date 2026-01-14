@@ -98,25 +98,16 @@ const Hero: React.FC = () => {
           >
             {/* Banner with Discord Integration */}
             <div className="relative h-40 overflow-hidden">
-              {discordUser?.banner_url && discordUser.banner_url.trim() ? (
-                <img
-                  key={`banner-${discordUser.banner_url}-${discordUser.id}`} // Key ekleyerek değiştiğinde yeniden render et
-                  src={discordUser.banner_url}
-                  alt="Discord Banner"
-                  className="object-cover w-full h-full transition-opacity duration-300"
-                  onError={(e) => {
-                    console.error("Banner image failed to load:", discordUser.banner_url);
-                    e.currentTarget.src = "https://images.pexels.com/photos/3075993/pexels-photo-3075993.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
-                  }}
-                />
-              ) : (
-                <img
-                  src="https://images.pexels.com/photos/3075993/pexels-photo-3075993.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-                  alt="Default Banner"
-                  className="object-cover w-full h-full"
-                />
-              )}
-              {/* Gradient'i kaldırdık - Discord banner'ı direkt gösteriliyor */}
+              <img
+                key={`banner-${discordUser?.id || 'default'}`}
+                src="https://images-ext-1.discordapp.net/external/GtEgnIDFnEBS0gPmo5aLyYz1onfEbfKksaacQml6NdQ/%3Fsize%3D4096/https/cdn.discordapp.com/banners/506122365055401999/a_c38eeb27d402aa15266c7e3a3d4b7996.gif"
+                alt="Discord Banner"
+                className="object-cover w-full h-full transition-opacity duration-300"
+                onError={(e) => {
+                  console.error("Banner image failed to load");
+                  e.currentTarget.src = discordUser?.banner_url || "https://images.pexels.com/photos/3075993/pexels-photo-3075993.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+                }}
+              />
             </div>
 
             {/* Profile Content with Discord styling */}
@@ -148,19 +139,45 @@ const Hero: React.FC = () => {
                     </span>
                   </div>
                   {discordUser && (
-                    <div className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-white dark:bg-slate-800 border-[4px] border-white dark:border-slate-800 flex items-center justify-center">
-                      <div
-                        className={`w-5 h-5 rounded-full ${
-                          discordUser.status === 'online'
-                            ? 'bg-green-500'
-                            : discordUser.status === 'idle'
-                            ? 'bg-yellow-500'
-                            : discordUser.status === 'dnd'
-                            ? 'bg-red-500'
-                            : 'bg-gray-500'
-                        }`}
-                      />
-                    </div>
+                    <motion.div 
+                      className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-white dark:bg-slate-800 border-[4px] border-white dark:border-slate-800 flex items-center justify-center status-indicator-container"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    >
+                      {/* Discord tarzı durum şekilleri */}
+                      {discordUser.status === 'online' ? (
+                        <div className="relative">
+                          <div className="w-5 h-5 rounded-full bg-green-500 status-indicator" />
+                          <div className="absolute inset-0 rounded-full bg-green-500 blur-md opacity-0 status-glow" style={{ filter: 'blur(8px)' }} />
+                        </div>
+                      ) : discordUser.status === 'idle' ? (
+                        <div className="relative">
+                          {/* Discord idle durumu - ay şekli */}
+                          <svg className="w-5 h-5 status-indicator" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                              <mask id={`idle-mask-${discordUser.id}`}>
+                                <rect width="20" height="20" fill="white" />
+                                <circle cx="6" cy="10" r="6" fill="black" />
+                              </mask>
+                            </defs>
+                            <circle cx="10" cy="10" r="8" fill="#FCD34D" mask={`url(#idle-mask-${discordUser.id})`} />
+                          </svg>
+                          <div className="absolute inset-0 bg-yellow-500 blur-md opacity-0 status-glow rounded-full" style={{ filter: 'blur(8px)', width: '120%', height: '120%', top: '-10%', left: '-10%' }} />
+                        </div>
+                      ) : discordUser.status === 'dnd' ? (
+                        <div className="relative">
+                          <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center status-indicator">
+                            <div className="w-3 h-0.5 bg-white rounded-full" />
+                          </div>
+                          <div className="absolute inset-0 rounded-full bg-red-500 blur-md opacity-0 status-glow" style={{ filter: 'blur(8px)' }} />
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <div className="w-5 h-5 rounded-full bg-gray-500 status-indicator" />
+                          <div className="absolute inset-0 rounded-full bg-gray-500 blur-md opacity-0 status-glow" style={{ filter: 'blur(8px)' }} />
+                        </div>
+                      )}
+                    </motion.div>
                   )}
                 </div>
               </div>
@@ -567,6 +584,30 @@ const Hero: React.FC = () => {
           50% {
             opacity: 0.9;
             transform: scale(1.1);
+          }
+        }
+        .status-indicator-container {
+          cursor: pointer;
+        }
+        .status-glow {
+          pointer-events: none;
+          z-index: -1;
+        }
+        .status-indicator-container:hover .status-glow {
+          opacity: 0.8 !important;
+          animation: status-pulse 1.5s ease-in-out infinite;
+        }
+        .status-indicator-container:hover .status-indicator {
+          filter: brightness(1.2);
+        }
+        @keyframes status-pulse {
+          0%, 100% {
+            opacity: 0.6;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
           }
         }
       `}</style>
