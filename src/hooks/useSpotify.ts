@@ -3,21 +3,18 @@ import { SpotifyData } from '../types';
 import { useAppStore } from '../store';
 
 export const useSpotify = () => {
-  const [spotifyData, setSpotifyData] = useState<SpotifyData>({ isPlaying: false });
-  const [loading, setLoading] = useState<boolean>(true);
   const discordUser = useAppStore((state) => state.discordUser);
+  const [spotifyData, setSpotifyData] = useState<SpotifyData>({ isPlaying: false });
 
-  // Discord aktivitelerinden Spotify bilgisini çıkar
+  // Discord aktivitelerinden Spotify bilgisini çıkar - HEMEN güncelle
   useEffect(() => {
-    if (!discordUser) {
-      setLoading(true);
+    if (!discordUser || !discordUser.activities) {
+      setSpotifyData({ isPlaying: false });
       return;
     }
 
-    setLoading(false);
-
     // Type 2 = Listening (Spotify aktivitesi)
-    const spotifyActivity = discordUser.activities?.find((activity) => activity.type === 2 && activity.name === 'Spotify');
+    const spotifyActivity = discordUser.activities.find((activity) => activity.type === 2 && activity.name === 'Spotify');
 
     if (!spotifyActivity) {
       setSpotifyData({ isPlaying: false });

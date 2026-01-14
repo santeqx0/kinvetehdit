@@ -53,10 +53,8 @@ export const useLanyard = () => {
 
     const fetchLanyardData = async () => {
       try {
-        const [lanyardResponse, bannerUrl] = await Promise.all([
-          fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`),
-          fetchBannerFromDiscordLookup(),
-        ]);
+        // ÖNCE Lanyard API'den profil bilgilerini çek (hızlı)
+        const lanyardResponse = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`);
 
         if (!lanyardResponse.ok) {
           throw new Error(
@@ -65,18 +63,17 @@ export const useLanyard = () => {
         }
 
         const lanyardData = await lanyardResponse.json();
-        console.log("Lanyard API response:", lanyardData);
 
         if (lanyardData.success && lanyardData.data) {
           const user = lanyardData.data.discord_user;
-          console.log("Discord user data:", user);
-          console.log("Banner URL:", bannerUrl);
+          
+          // HEMEN profil bilgilerini göster (banner beklemeden)
           const newDiscordUser = {
             username: user.username || "Bilinmeyen Kullanıcı",
             discriminator: user.discriminator || "0000",
             id: user.id,
             avatar: user.avatar || null,
-            banner_url: bannerUrl, 
+            banner_url: null, // Banner'ı sonra yükleyeceğiz
             about:
               lanyardData.data.activities?.find((a: any) => a.type === 4)?.state ||
               null,
@@ -94,8 +91,25 @@ export const useLanyard = () => {
               })) || [],
             badges: ['nitro', 'active_developer', 'verified_developer'], 
           };
+          
+          // HEMEN store'a yaz ve göster
           setDiscordUser(newDiscordUser);
-          setDiscordUserStore(newDiscordUser); // Store'a da yaz
+          setDiscordUserStore(newDiscordUser);
+          setLoading(false); // Loading'i hemen kapat
+          
+          // Banner'ı ARKA PLANDA yükle (bloklamadan)
+          fetchBannerFromDiscordLookup().then((bannerUrl) => {
+            if (bannerUrl) {
+              setDiscordUser((prev) => {
+                if (!prev) return null;
+                const updatedUser = { ...prev, banner_url: bannerUrl };
+                setDiscordUserStore(updatedUser);
+                return updatedUser;
+              });
+            }
+          }).catch((err) => {
+            console.error("Banner fetch error (non-critical):", err);
+          });
         } else {
           const errorMsg = lanyardData.error?.message || "Lanyard API returned unsuccessful response";
           console.error("Lanyard API error:", lanyardData);
@@ -104,10 +118,7 @@ export const useLanyard = () => {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Unknown error";
         console.error("Error fetching Lanyard data:", err);
-        // Hata durumunda bile loading'i false yap, böylece varsayılan profil gösterilebilir
         setError(errorMessage);
-        setLoading(false);
-      } finally {
         setLoading(false);
       }
     };
@@ -134,125 +145,127 @@ export const useLanyard = () => {
       }
     }, 30000); // 30 saniye
 
-    const ws = new WebSocket("wss://api.lanyard.rest/socket");
-
+    // WebSocket'i HEMEN başlat (banner fetch'i bekletme)
+    let ws: WebSocket | null = new WebSocket("wss://api.lanyard.rest/socket");
     let heartbeatInterval: NodeJS.Timeout | null = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
 
-    ws.onopen = () => {
-      console.log("WebSocket connected");
-      ws.send(
-        JSON.stringify({
-          op: 2,
-          d: {
-            subscribe_to_ids: [DISCORD_ID],
-          },
-        })
-      );
-    };
+    const setupWebSocket = (websocket: WebSocket) => {
+      websocket.onopen = () => {
+        console.log("WebSocket connected");
+        reconnectAttempts = 0;
+        websocket.send(
+          JSON.stringify({
+            op: 2,
+            d: {
+              subscribe_to_ids: [DISCORD_ID],
+            },
+          })
+        );
+      };
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("WebSocket message:", data);
+      websocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
 
-      if (data.op === 1) {
-        const interval = data.d.heartbeat_interval;
+        if (data.op === 1) {
+          const interval = data.d.heartbeat_interval;
+          if (heartbeatInterval) clearInterval(heartbeatInterval);
+          heartbeatInterval = setInterval(() => {
+            if (websocket.readyState === WebSocket.OPEN) {
+              websocket.send(
+                JSON.stringify({
+                  op: 3,
+                })
+              );
+            }
+          }, interval);
+        }
+
+        if (
+          data.op === 0 &&
+          data.t === "PRESENCE_UPDATE" &&
+          data.d.user_id === DISCORD_ID
+        ) {
+          const user = data.d.discord_user;
+          
+          // HEMEN güncelle (banner beklemeden) - gerçek zamanlı için kritik
+          setDiscordUser((prev) => {
+            if (!prev) return prev;
+            const updatedUser = {
+              username: user.username || prev.username || "Bilinmeyen Kullanıcı",
+              discriminator: user.discriminator || prev.discriminator || "0000",
+              id: user.id || prev.id,
+              avatar: user.avatar || prev.avatar || null,
+              banner_url: prev.banner_url || null, // Banner'ı koru, sonra güncelleriz
+              about:
+                data.d.activities?.find((a: any) => a.type === 4)?.state || prev.about || null,
+              status: data.d.discord_status || "offline",
+              activities:
+                data.d.activities?.map((activity: any) => ({
+                  type: activity.type,
+                  name: activity.name,
+                  details: activity.details || null,
+                  state: activity.state || null,
+                  timestamps: activity.timestamps || null,
+                  assets: activity.assets || null,
+                  sync_id: activity.sync_id || null,
+                  party: activity.party || null,
+                })) || [],
+              badges: prev.badges || ['nitro', 'active_developer', 'verified_developer'],
+            };
+            setDiscordUserStore(updatedUser); // Store'a HEMEN yaz
+            return updatedUser;
+          });
+          
+          // Banner'ı ARKA PLANDA güncelle (bloklamadan)
+          fetchBannerFromDiscordLookup().then((bannerUrl) => {
+            if (bannerUrl) {
+              setDiscordUser((prev) => {
+                if (!prev) return null;
+                const updatedUser = { ...prev, banner_url: bannerUrl };
+                setDiscordUserStore(updatedUser);
+                return updatedUser;
+              });
+            }
+          }).catch((err) => {
+            // Banner hatası kritik değil, sessizce geç
+          });
+        }
+      };
+
+      websocket.onerror = (err) => {
+        console.error("WebSocket error:", err);
+      };
+
+      websocket.onclose = () => {
+        console.log("WebSocket closed");
         if (heartbeatInterval) clearInterval(heartbeatInterval);
-        heartbeatInterval = setInterval(() => {
-          ws.send(
-            JSON.stringify({
-              op: 3,
-            })
-          );
-        }, interval);
-      }
-
-      if (
-        data.op === 0 &&
-        data.t === "PRESENCE_UPDATE" &&
-        data.d.user_id === DISCORD_ID
-      ) {
-        const user = data.d.discord_user;
-        console.log("WebSocket presence update:", user);
         
-        // Banner'ı da güncelle ve hem local state hem store'u güncelle
-        fetchBannerFromDiscordLookup().then((bannerUrl) => {
-          setDiscordUser((prev) => {
-            if (!prev) return prev;
-            const updatedUser = {
-              username: user.username || prev.username || "Bilinmeyen Kullanıcı",
-              discriminator: user.discriminator || prev.discriminator || "0000",
-              id: user.id || prev.id,
-              avatar: user.avatar || prev.avatar || null,
-              banner_url: bannerUrl || prev.banner_url || null,
-              about:
-                data.d.activities?.find((a: any) => a.type === 4)?.state || prev.about || null,
-              status: data.d.discord_status || "offline",
-              activities:
-                data.d.activities?.map((activity: any) => ({
-                  type: activity.type,
-                  name: activity.name,
-                  details: activity.details || null,
-                  state: activity.state || null,
-                  timestamps: activity.timestamps || null,
-                  assets: activity.assets || null,
-                  sync_id: activity.sync_id || null,
-                  party: activity.party || null,
-                })) || [],
-              badges: prev.badges || ['nitro', 'active_developer', 'verified_developer'],
-            };
-            setDiscordUserStore(updatedUser); // Store'a da yaz
-            return updatedUser;
-          });
-        }).catch((err) => {
-          console.error("Error fetching banner in WebSocket update:", err);
-          // Banner hatası olsa bile diğer bilgileri güncelle
-          setDiscordUser((prev) => {
-            if (!prev) return prev;
-            const updatedUser = {
-              username: user.username || prev.username || "Bilinmeyen Kullanıcı",
-              discriminator: user.discriminator || prev.discriminator || "0000",
-              id: user.id || prev.id,
-              avatar: user.avatar || prev.avatar || null,
-              banner_url: prev.banner_url || null,
-              about:
-                data.d.activities?.find((a: any) => a.type === 4)?.state || prev.about || null,
-              status: data.d.discord_status || "offline",
-              activities:
-                data.d.activities?.map((activity: any) => ({
-                  type: activity.type,
-                  name: activity.name,
-                  details: activity.details || null,
-                  state: activity.state || null,
-                  timestamps: activity.timestamps || null,
-                  assets: activity.assets || null,
-                  sync_id: activity.sync_id || null,
-                  party: activity.party || null,
-                })) || [],
-              badges: prev.badges || ['nitro', 'active_developer', 'verified_developer'],
-            };
-            setDiscordUserStore(updatedUser); // Store'a da yaz
-            return updatedUser;
-          });
-        });
-      }
+        // Otomatik yeniden bağlan (max 5 deneme)
+        if (reconnectAttempts < maxReconnectAttempts) {
+          reconnectAttempts++;
+          const delay = Math.min(1000 * reconnectAttempts, 10000); // Exponential backoff
+          setTimeout(() => {
+            console.log(`Reconnecting WebSocket (attempt ${reconnectAttempts})...`);
+            ws = new WebSocket("wss://api.lanyard.rest/socket");
+            setupWebSocket(ws);
+          }, delay);
+        }
+      };
     };
 
-    ws.onerror = (err) => {
-      console.error("WebSocket error:", err);
-      // WebSocket hatası kritik değil, sadece log'la
-    };
+    setupWebSocket(ws);
 
-    ws.onclose = () => {
-      console.log("WebSocket closed");
-      if (heartbeatInterval) clearInterval(heartbeatInterval);
-      // WebSocket kapandığında hata gösterme, sadece log'la
-    };
 
     return () => {
       console.log("Cleaning up WebSocket");
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       if (bannerUpdateInterval) clearInterval(bannerUpdateInterval);
-      ws.close();
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
     };
   }, []);
 

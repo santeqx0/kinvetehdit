@@ -41,12 +41,7 @@ function App() {
   const setDiscordUser = useAppStore((state) => state.setDiscordUser);
   const setSpotifyData = useAppStore((state) => state.setSpotifyData);
 
-  // Update global state with Discord user data
-  useEffect(() => {
-    if (discordUser) {
-      setDiscordUser(discordUser);
-    }
-  }, [discordUser, setDiscordUser]);
+  // Store zaten hook içinde güncelleniyor, burada gereksiz
 
   // Log Discord errors for debugging
   useEffect(() => {
