@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { DiscordUser, Activity } from "../types";
 
-const DISCORD_ID = import.meta.env.VITE_discord_id;
+const DISCORD_ID = import.meta.env.VITE_DISCORD_ID;
 
 export const useLanyard = () => {
   const [discordUser, setDiscordUser] = useState<DiscordUser | null>(null);
@@ -9,6 +9,11 @@ export const useLanyard = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!DISCORD_ID) {
+      setError("Discord ID bulunamadı. Lütfen .env dosyasında VITE_DISCORD_ID değişkenini ayarlayın.");
+      setLoading(false);
+      return;
+    }
     const fetchBannerFromDiscordLookup = async () => {
       try {
         const response = await fetch(

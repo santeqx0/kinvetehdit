@@ -195,7 +195,7 @@ const Hero: React.FC = () => {
                     Server Booster
                   </span>
                   <span className="px-2 py-1 text-xs font-medium text-green-600 bg-green-100 rounded-md dark:bg-green-900/30 dark:text-green-400">
-                    discord.gg/vsc üyesi
+                    Bug Hunter
                   </span>
                 </div>
 
