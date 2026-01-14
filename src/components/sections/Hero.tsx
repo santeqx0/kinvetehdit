@@ -116,7 +116,7 @@ const Hero: React.FC = () => {
                   className="object-cover w-full h-full"
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              {/* Gradient'i kaldırdık - Discord banner'ı direkt gösteriliyor */}
             </div>
 
             {/* Profile Content with Discord styling */}
@@ -165,38 +165,64 @@ const Hero: React.FC = () => {
                 </div>
               </div>
 
-              {/* Discord Badges */}
-              <div className="absolute flex gap-1 -top-12 right-6">
-                {userBadgeIds.map((badgeId, index) => {
-                  const badge = discordBadges.find((b) => b.id === badgeId);
-                  if (!badge) return null;
-
-                  return (
-                    <div
-                      key={index}
-                      className="flex items-center justify-center w-8 h-8 rounded-full tooltip-container"
-                      title={badge.name}
-                    >
-                      <img
-                        src={badge.icon}
-                        alt={badge.name}
-                        className="w-6 h-6"
-                        onError={(e) => {
-                          e.currentTarget.parentElement!.innerHTML = `<div class="w-6 h-6 rounded-full ${badge.class} flex items-center justify-center text-xs font-bold">${badge.name.charAt(0)}</div>`;
-                        }}
-                      />
-                      <div className="tooltip">{badge.name}</div>
-                    </div>
-                  );
-                })}
-              </div>
-
               {/* Profile Info - Discord Style */}
               <div className="pt-24 pb-5">
-                <div className="flex items-baseline gap-2 mb-3">
+                <div className="flex items-center gap-3 mb-3 flex-wrap">
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {discordUser?.username || 'Sante'}
                   </h1>
+                  
+                  {/* Discord Badges - Kullanıcı adının yanında */}
+                  <div className="flex gap-2 items-center">
+                    {userBadgeIds.map((badgeId, index) => {
+                      const badge = discordBadges.find((b) => b.id === badgeId);
+                      if (!badge) return null;
+
+                      return (
+                        <motion.div
+                          key={index}
+                          className="relative tooltip-container"
+                          title={badge.name}
+                          whileHover={{ 
+                            scale: 1.15,
+                            y: -2
+                          }}
+                          transition={{ 
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 17
+                          }}
+                        >
+                          <div className="relative group">
+                            <img
+                              src={badge.icon}
+                              alt={badge.name}
+                              className="w-7 h-7 transition-all duration-300 relative z-10"
+                              onError={(e) => {
+                                e.currentTarget.parentElement!.innerHTML = `<div class="w-7 h-7 rounded-full ${badge.class} flex items-center justify-center text-xs font-bold relative z-10">${badge.name.charAt(0)}</div>`;
+                              }}
+                            />
+                            {/* Neon glow efekti */}
+                            <div className="absolute inset-0 blur-lg opacity-0 group-hover:opacity-70 transition-opacity duration-300 badge-glow rounded-full"
+                              style={{
+                                background: badge.id === 'nitro' ? 'rgba(139, 92, 246, 0.8)' :
+                                           badge.id === 'partner' ? 'rgba(59, 130, 246, 0.8)' :
+                                           badge.id === 'verified_developer' ? 'rgba(37, 99, 235, 0.8)' :
+                                           badge.id === 'active_developer' ? 'rgba(34, 197, 94, 0.8)' :
+                                           badge.id === 'early_supporter' ? 'rgba(236, 72, 153, 0.8)' :
+                                           badge.id === 'booster' ? 'rgba(239, 68, 68, 0.8)' : 'rgba(156, 163, 175, 0.8)',
+                                width: '120%',
+                                height: '120%',
+                                top: '-10%',
+                                left: '-10%'
+                              }}
+                            />
+                          </div>
+                          <div className="tooltip">{badge.name}</div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* User Badges - Discord Style */}
@@ -506,22 +532,42 @@ const Hero: React.FC = () => {
         }
         .tooltip {
           position: absolute;
-          top: -30px;
+          top: -35px;
           left: 50%;
           transform: translateX(-50%);
-          background-color: rgba(0,0,0,0.8);
+          background-color: rgba(0,0,0,0.9);
           color: white;
-          padding: 4px 8px;
-          border-radius: 4px;
+          padding: 6px 10px;
+          border-radius: 6px;
           font-size: 12px;
           white-space: nowrap;
           opacity: 0;
           visibility: hidden;
           transition: opacity 0.2s, visibility 0.2s;
+          z-index: 50;
+          pointer-events: none;
         }
         .tooltip-container:hover .tooltip {
           opacity: 1;
           visibility: visible;
+        }
+        .badge-glow {
+          filter: blur(12px);
+          z-index: 0;
+          pointer-events: none;
+        }
+        .group:hover .badge-glow {
+          animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+          0%, 100% {
+            opacity: 0.6;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.9;
+            transform: scale(1.1);
+          }
         }
       `}</style>
     </section>
