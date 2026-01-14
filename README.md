@@ -41,11 +41,12 @@ React, TypeScript ve Tailwind CSS ile geliştirilmiş şık bir kişisel portfö
 3. **Çevre Değişkenlerini Ayarlayın**:
    Proje kök dizininde bir `.env` dosyası oluşturun ve şu şekilde doldurun:
    ```env
-    VITE_spotify_client_id=clientidn
-    VITE_spotify_client_secret=clientsecret
-    VITE_spotify_refresh_token=refreshtoken
-    VITE_discord_id=discordidn
+    VITE_SPOTIFY_CLIENT_ID=clientidn
+    VITE_SPOTIFY_CLIENT_SECRET=clientsecret
+    VITE_SPOTIFY_REFRESH_TOKEN=refreshtoken
+    VITE_DISCORD_ID=506122365055401999
    ```
+   **ÖNEMLİ**: Discord profilinin görünmesi için `VITE_DISCORD_ID` değişkeninin mutlaka ayarlanması gerekir. Discord User ID'nizi almak için Discord Developer Mode'u açıp kullanıcı adınıza sağ tıklayarak "Copy User ID" seçeneğini kullanabilirsiniz.
    - `VITE_SPOTIFY_REFRESH_TOKEN` için aşağıdaki "Spotify Refresh Token Alma" adımlarını takip edin.
 
 4. **Projeyi Çalıştırın**:

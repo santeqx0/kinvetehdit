@@ -9,9 +9,12 @@ export const useLanyard = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("useLanyard hook initialized. DISCORD_ID:", DISCORD_ID ? "Set" : "NOT SET");
     if (!DISCORD_ID) {
-      setError("Discord ID bulunamadı. Lütfen .env dosyasında VITE_DISCORD_ID değişkenini ayarlayın.");
+      const errorMsg = "Discord ID bulunamadı. Lütfen .env dosyasında VITE_DISCORD_ID değişkenini ayarlayın.";
+      setError(errorMsg);
       setLoading(false);
+      console.error(errorMsg);
       return;
     }
     const fetchBannerFromDiscordLookup = async () => {
@@ -51,10 +54,12 @@ export const useLanyard = () => {
         const lanyardData = await lanyardResponse.json();
         console.log("Lanyard API response:", lanyardData);
 
-        if (lanyardData.success) {
+        if (lanyardData.success && lanyardData.data) {
           const user = lanyardData.data.discord_user;
+          console.log("Discord user data:", user);
           setDiscordUser({
             username: user.username || "Bilinmeyen Kullanıcı",
+            discriminator: user.discriminator || "0000",
             id: user.id,
             avatar: user.avatar || null,
             banner_url: bannerUrl, 
@@ -74,7 +79,9 @@ export const useLanyard = () => {
             badges: ['nitro', 'active_developer', 'verified_developer'], 
           });
         } else {
-          throw new Error("Lanyard API returned unsuccessful response");
+          const errorMsg = lanyardData.error?.message || "Lanyard API returned unsuccessful response";
+          console.error("Lanyard API error:", lanyardData);
+          throw new Error(errorMsg);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
@@ -126,6 +133,7 @@ export const useLanyard = () => {
         const user = data.d.discord_user;
         setDiscordUser((prev) => ({
           username: user.username || prev?.username || "Bilinmeyen Kullanıcı",
+          discriminator: user.discriminator || prev?.discriminator || "0000",
           id: user.id || prev?.id,
           avatar: user.avatar || prev?.avatar || null,
           banner_url: prev?.banner_url || null, 

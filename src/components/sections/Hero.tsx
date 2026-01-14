@@ -8,7 +8,7 @@ import { Activity as ActivityType } from '../../types';
 
 const Hero: React.FC = () => {
   const setActiveSection = useAppStore((state) => state.setActiveSection);
-  const { discordUser } = useAppStore();
+  const discordUser = useAppStore((state) => state.discordUser);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -116,6 +116,13 @@ const Hero: React.FC = () => {
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              {!discordUser && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <div className="px-4 py-2 text-sm text-white bg-red-500/90 rounded-lg backdrop-blur-sm">
+                    Discord profili yüklenemedi. Lütfen .env dosyasında VITE_DISCORD_ID değişkenini kontrol edin.
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Profile Content with Discord styling */}
@@ -123,32 +130,41 @@ const Hero: React.FC = () => {
               {/* Avatar with Discord style */}
               <div className="absolute -top-20 left-6">
                 <div className="w-[130px] h-[130px] rounded-full border-[8px] border-white dark:border-slate-800 relative">
-                  {discordUser?.avatar ? (
+                  {discordUser?.avatar && discordUser?.id ? (
                     <img
                       src={`https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=256`}
                       alt="Discord Avatar"
                       className="object-cover w-full h-full rounded-full"
+                      onError={(e) => {
+                        console.error("Avatar image failed to load:", discordUser.avatar);
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
                     />
-                  ) : (
-                    <div className="flex items-center justify-center w-full h-full bg-gray-200 rounded-full dark:bg-slate-700">
-                      <span className="text-4xl font-medium text-gray-500 dark:text-gray-400">
-                        {(discordUser?.username || 'U').charAt(0)}
-                      </span>
+                  ) : null}
+                  <div 
+                    className={`flex items-center justify-center w-full h-full bg-gray-200 rounded-full dark:bg-slate-700 ${discordUser?.avatar && discordUser?.id ? 'hidden' : ''}`}
+                  >
+                    <span className="text-4xl font-medium text-gray-500 dark:text-gray-400">
+                      {(discordUser?.username || 'U').charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  {discordUser && (
+                    <div className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-white dark:bg-slate-800 border-[4px] border-white dark:border-slate-800 flex items-center justify-center">
+                      <div
+                        className={`w-5 h-5 rounded-full ${
+                          discordUser.status === 'online'
+                            ? 'bg-green-500'
+                            : discordUser.status === 'idle'
+                            ? 'bg-yellow-500'
+                            : discordUser.status === 'dnd'
+                            ? 'bg-red-500'
+                            : 'bg-gray-500'
+                        }`}
+                      />
                     </div>
                   )}
-                  <div className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-white dark:bg-slate-800 border-[4px] border-white dark:border-slate-800 flex items-center justify-center">
-                    <div
-                      className={`w-5 h-5 rounded-full ${
-                        discordUser?.status === 'online'
-                          ? 'bg-green-500'
-                          : discordUser?.status === 'idle'
-                          ? 'bg-yellow-500'
-                          : discordUser?.status === 'dnd'
-                          ? 'bg-red-500'
-                          : 'bg-gray-500'
-                      }`}
-                    />
-                  </div>
                 </div>
               </div>
 

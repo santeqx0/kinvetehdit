@@ -36,7 +36,7 @@ const MainPage: React.FC = () => {
 
 function App() {
   const { effectiveTheme } = useTheme();
-  const { discordUser } = useLanyard();
+  const { discordUser, loading: discordLoading, error: discordError } = useLanyard();
   const { spotifyData } = useSpotify();
   const setDiscordUser = useAppStore((state) => state.setDiscordUser);
   const setSpotifyData = useAppStore((state) => state.setSpotifyData);
@@ -47,6 +47,13 @@ function App() {
       setDiscordUser(discordUser);
     }
   }, [discordUser, setDiscordUser]);
+
+  // Log Discord errors for debugging
+  useEffect(() => {
+    if (discordError) {
+      console.error("Discord Error:", discordError);
+    }
+  }, [discordError]);
 
   // Update global state with Spotify data
   useEffect(() => {
