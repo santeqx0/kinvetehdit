@@ -100,8 +100,8 @@ const Hero: React.FC = () => {
             <div className="relative h-40 overflow-hidden">
               {discordUser?.banner_url && discordUser.banner_url.trim() ? (
                 <img
-                  key={discordUser.banner_url} // Key ekleyerek değiştiğinde yeniden render et
-                  src={`${discordUser.banner_url}?t=${Date.now()}`} // Cache'i bypass etmek için timestamp ekle
+                  key={`banner-${discordUser.banner_url}-${discordUser.id}`} // Key ekleyerek değiştiğinde yeniden render et
+                  src={discordUser.banner_url}
                   alt="Discord Banner"
                   className="object-cover w-full h-full transition-opacity duration-300"
                   onError={(e) => {

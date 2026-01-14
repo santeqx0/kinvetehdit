@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { DiscordUser, Activity } from "../types";
+import { useAppStore } from "../store";
 
 const DISCORD_ID = import.meta.env.VITE_DISCORD_ID;
 
@@ -7,6 +8,7 @@ export const useLanyard = () => {
   const [discordUser, setDiscordUser] = useState<DiscordUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const setDiscordUserStore = useAppStore((state) => state.setDiscordUser);
 
   useEffect(() => {
     console.log("useLanyard hook initialized. DISCORD_ID:", DISCORD_ID ? "Set" : "NOT SET");
@@ -31,7 +33,18 @@ export const useLanyard = () => {
         const data = await response.json();
         console.log("DiscordLookup API response (banner):", data);
 
-        return data.banner?.link || null;
+        // Banner link'i varsa kullan, yoksa Discord CDN'den dene
+        if (data.banner?.link) {
+          return data.banner.link;
+        }
+        
+        // Discord CDN'den banner almayı dene
+        if (data.banner) {
+          const bannerHash = data.banner;
+          return `https://cdn.discordapp.com/banners/${DISCORD_ID}/${bannerHash}.${data.banner.startsWith('a_') ? 'gif' : 'png'}?size=512`;
+        }
+        
+        return null;
       } catch (err) {
         console.error("Error fetching DiscordLookup banner:", err);
         return null;
@@ -58,7 +71,7 @@ export const useLanyard = () => {
           const user = lanyardData.data.discord_user;
           console.log("Discord user data:", user);
           console.log("Banner URL:", bannerUrl);
-          setDiscordUser({
+          const newDiscordUser = {
             username: user.username || "Bilinmeyen Kullanıcı",
             discriminator: user.discriminator || "0000",
             id: user.id,
@@ -80,7 +93,9 @@ export const useLanyard = () => {
                 party: activity.party || null,
               })) || [],
             badges: ['nitro', 'active_developer', 'verified_developer'], 
-          });
+          };
+          setDiscordUser(newDiscordUser);
+          setDiscordUserStore(newDiscordUser); // Store'a da yaz
         } else {
           const errorMsg = lanyardData.error?.message || "Lanyard API returned unsuccessful response";
           console.error("Lanyard API error:", lanyardData);
@@ -107,7 +122,9 @@ export const useLanyard = () => {
           setDiscordUser((prev) => {
             if (prev && prev.banner_url !== bannerUrl) {
               console.log("Banner updated:", bannerUrl);
-              return { ...prev, banner_url: bannerUrl };
+              const updatedUser = { ...prev, banner_url: bannerUrl };
+              setDiscordUserStore(updatedUser); // Store'a da yaz
+              return updatedUser;
             }
             return prev;
           });
@@ -157,11 +174,11 @@ export const useLanyard = () => {
         const user = data.d.discord_user;
         console.log("WebSocket presence update:", user);
         
-        // Banner'ı da güncelle
+        // Banner'ı da güncelle ve hem local state hem store'u güncelle
         fetchBannerFromDiscordLookup().then((bannerUrl) => {
           setDiscordUser((prev) => {
             if (!prev) return prev;
-            return {
+            const updatedUser = {
               username: user.username || prev.username || "Bilinmeyen Kullanıcı",
               discriminator: user.discriminator || prev.discriminator || "0000",
               id: user.id || prev.id,
@@ -183,13 +200,15 @@ export const useLanyard = () => {
                 })) || [],
               badges: prev.badges || ['nitro', 'active_developer', 'verified_developer'],
             };
+            setDiscordUserStore(updatedUser); // Store'a da yaz
+            return updatedUser;
           });
         }).catch((err) => {
           console.error("Error fetching banner in WebSocket update:", err);
           // Banner hatası olsa bile diğer bilgileri güncelle
           setDiscordUser((prev) => {
             if (!prev) return prev;
-            return {
+            const updatedUser = {
               username: user.username || prev.username || "Bilinmeyen Kullanıcı",
               discriminator: user.discriminator || prev.discriminator || "0000",
               id: user.id || prev.id,
@@ -206,9 +225,13 @@ export const useLanyard = () => {
                   state: activity.state || null,
                   timestamps: activity.timestamps || null,
                   assets: activity.assets || null,
+                  sync_id: activity.sync_id || null,
+                  party: activity.party || null,
                 })) || [],
               badges: prev.badges || ['nitro', 'active_developer', 'verified_developer'],
             };
+            setDiscordUserStore(updatedUser); // Store'a da yaz
+            return updatedUser;
           });
         });
       }
