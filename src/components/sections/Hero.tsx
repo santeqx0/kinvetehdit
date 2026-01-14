@@ -116,13 +116,6 @@ const Hero: React.FC = () => {
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              {!discordUser && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                  <div className="px-4 py-2 text-sm text-white bg-red-500/90 rounded-lg backdrop-blur-sm">
-                    Discord profili yüklenemedi. Lütfen .env dosyasında VITE_DISCORD_ID değişkenini kontrol edin.
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Profile Content with Discord styling */}
@@ -139,15 +132,17 @@ const Hero: React.FC = () => {
                         console.error("Avatar image failed to load:", discordUser.avatar);
                         e.currentTarget.style.display = 'none';
                         const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                        if (fallback) fallback.style.display = 'flex';
+                        if (fallback) {
+                          fallback.style.display = 'flex';
+                        }
                       }}
                     />
                   ) : null}
                   <div 
-                    className={`flex items-center justify-center w-full h-full bg-gray-200 rounded-full dark:bg-slate-700 ${discordUser?.avatar && discordUser?.id ? 'hidden' : ''}`}
+                    className={`flex items-center justify-center w-full h-full bg-gray-200 rounded-full dark:bg-slate-700 ${discordUser?.avatar && discordUser?.id ? 'absolute inset-0 hidden' : ''}`}
                   >
                     <span className="text-4xl font-medium text-gray-500 dark:text-gray-400">
-                      {(discordUser?.username || 'U').charAt(0).toUpperCase()}
+                      {(discordUser?.username || 'S').charAt(0).toUpperCase()}
                     </span>
                   </div>
                   {discordUser && (

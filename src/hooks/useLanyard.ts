@@ -84,8 +84,11 @@ export const useLanyard = () => {
           throw new Error(errorMsg);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
         console.error("Error fetching Lanyard data:", err);
+        // Hata durumunda bile loading'i false yap, böylece varsayılan profil gösterilebilir
+        setError(errorMessage);
+        setLoading(false);
       } finally {
         setLoading(false);
       }
@@ -155,14 +158,14 @@ export const useLanyard = () => {
     };
 
     ws.onerror = (err) => {
-      setError("WebSocket connection error");
       console.error("WebSocket error:", err);
+      // WebSocket hatası kritik değil, sadece log'la
     };
 
     ws.onclose = () => {
-      setError("WebSocket connection closed");
       console.log("WebSocket closed");
       if (heartbeatInterval) clearInterval(heartbeatInterval);
+      // WebSocket kapandığında hata gösterme, sadece log'la
     };
 
     return () => {
