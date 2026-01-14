@@ -100,9 +100,10 @@ const Hero: React.FC = () => {
             <div className="relative h-40 overflow-hidden">
               {discordUser?.banner_url && discordUser.banner_url.trim() ? (
                 <img
-                  src={discordUser.banner_url}
+                  key={discordUser.banner_url} // Key ekleyerek değiştiğinde yeniden render et
+                  src={`${discordUser.banner_url}?t=${Date.now()}`} // Cache'i bypass etmek için timestamp ekle
                   alt="Discord Banner"
-                  className="object-cover w-full h-full"
+                  className="object-cover w-full h-full transition-opacity duration-300"
                   onError={(e) => {
                     console.error("Banner image failed to load:", discordUser.banner_url);
                     e.currentTarget.src = "https://images.pexels.com/photos/3075993/pexels-photo-3075993.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
@@ -125,9 +126,10 @@ const Hero: React.FC = () => {
                 <div className="w-[130px] h-[130px] rounded-full border-[8px] border-white dark:border-slate-800 relative">
                   {discordUser?.avatar && discordUser?.id ? (
                     <img
-                      src={`https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=256`}
+                      key={`${discordUser.id}-${discordUser.avatar}`} // Avatar değiştiğinde yeniden render et
+                      src={`https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=256&t=${Date.now()}`} // Cache'i bypass etmek için timestamp ekle
                       alt="Discord Avatar"
-                      className="object-cover w-full h-full rounded-full"
+                      className="object-cover w-full h-full rounded-full transition-opacity duration-300"
                       onError={(e) => {
                         console.error("Avatar image failed to load:", discordUser.avatar);
                         e.currentTarget.style.display = 'none';

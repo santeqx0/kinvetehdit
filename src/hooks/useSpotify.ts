@@ -1,132 +1,88 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { SpotifyData } from '../types';
+import { useAppStore } from '../store';
 
 export const useSpotify = () => {
   const [spotifyData, setSpotifyData] = useState<SpotifyData>({ isPlaying: false });
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const discordUser = useAppStore((state) => state.discordUser);
 
-
-  const CLIENT_ID = import.meta.env.VITE_spotify_client_id;
-  const CLIENT_SECRET = import.meta.env.VITE_spotify_client_secret;
-  const REFRESH_TOKEN = import.meta.env.VITE_spotify_refresh_token;
-  const TOKEN_ENDPOINT = 'https://accounts.spotify.com/api/token';
-  const NOW_PLAYING_ENDPOINT = 'https://api.spotify.com/v1/me/player/currently-playing';
-
-  const getAccessToken = async () => {
-    try {
-      const formData = new URLSearchParams();
-      formData.append('grant_type', 'refresh_token');
-      formData.append('refresh_token', REFRESH_TOKEN);
-      formData.append('client_id', CLIENT_ID);
-      formData.append('client_secret', CLIENT_SECRET);
-
-      const response = await axios.post(
-        TOKEN_ENDPOINT,
-        formData.toString(),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        }
-      );
-
-      const { access_token } = response.data;
-      setAccessToken(access_token);
-      localStorage.setItem('spotify_access_token', access_token);
-      localStorage.setItem('spotify_refresh_token', REFRESH_TOKEN); 
-      return access_token;
-    } catch (err) {
-      setError('Failed to fetch Spotify access token');
-      console.error('Error fetching Spotify token:', err);
-      return null;
-    }
-  };
-
-  const fetchCurrentlyPlaying = async (token: string) => {
-    try {
-      const response = await axios({
-        method: 'get',
-        url: NOW_PLAYING_ENDPOINT,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 204) {
-        setSpotifyData({ isPlaying: false });
-        return;
-      }
-
-      const data = response.data;
-
-      if (data && data.is_playing) {
-        setSpotifyData({
-          isPlaying: true,
-          songName: data.item.name,
-          artistName: data.item.artists.map((artist: any) => artist.name).join(', '),
-          albumName: data.item.album.name,
-          albumArt: data.item.album.images[0]?.url,
-          songUrl: data.item.external_urls.spotify,
-          progress_ms: data.progress_ms,
-          duration_ms: data.item.duration_ms,
-        });
-      } else {
-        setSpotifyData({ isPlaying: false });
-      }
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 401) {
-        const newToken = await getAccessToken();
-        if (newToken) {
-          fetchCurrentlyPlaying(newToken);
-        }
-      } else {
-        setError('Failed to fetch currently playing track');
-        console.error('Error fetching Spotify data:', err);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Discord aktivitelerinden Spotify bilgisini çıkar
   useEffect(() => {
-    const initialize = async () => {
-      const storedToken = localStorage.getItem('spotify_access_token');
+    if (!discordUser) {
+      setLoading(true);
+      return;
+    }
 
-      if (storedToken) {
-        setAccessToken(storedToken);
-        fetchCurrentlyPlaying(storedToken);
+    setLoading(false);
+
+    // Type 2 = Listening (Spotify aktivitesi)
+    const spotifyActivity = discordUser.activities?.find((activity) => activity.type === 2 && activity.name === 'Spotify');
+
+    if (!spotifyActivity) {
+      setSpotifyData({ isPlaying: false });
+      return;
+    }
+
+    // Spotify aktivitesinden bilgileri çıkar
+    const songName = spotifyActivity.details || 'Bilinmeyen Şarkı';
+    const artistName = spotifyActivity.state || 'Bilinmeyen Sanatçı';
+    const albumName = spotifyActivity.assets?.large_text || undefined;
+    
+    // Albüm kapağı URL'sini oluştur
+    let albumArt: string | undefined;
+    if (spotifyActivity.assets?.large_image) {
+      const imageId = spotifyActivity.assets.large_image;
+      // Eğer imageId zaten URL ise direkt kullan
+      if (imageId.startsWith('http')) {
+        albumArt = imageId;
+      } else if (imageId.startsWith('spotify:')) {
+        // spotify: ile başlıyorsa Spotify CDN'den al
+        const cleanImageId = imageId.replace('spotify:', '');
+        albumArt = `https://i.scdn.co/image/${cleanImageId}`;
       } else {
-        const newToken = await getAccessToken();
-        if (newToken) {
-          fetchCurrentlyPlaying(newToken);
-        }
+        // Discord CDN'den al (Spotify application_id: 463097721130377216)
+        albumArt = `https://cdn.discordapp.com/app-assets/463097721130377216/${imageId}.png`;
       }
-    };
+    }
 
-    initialize();
-
-    const interval = setInterval(async () => {
-      if (accessToken) {
-        fetchCurrentlyPlaying(accessToken);
-      } else {
-        const storedToken = localStorage.getItem('spotify_access_token');
-        if (storedToken) {
-          setAccessToken(storedToken);
-          fetchCurrentlyPlaying(storedToken);
-        } else {
-          const newToken = await getAccessToken();
-          if (newToken) {
-            fetchCurrentlyPlaying(newToken);
-          }
-        }
+    // İlerleme hesaplama (timestamps varsa)
+    let progress_ms: number | undefined;
+    let duration_ms: number | undefined;
+    if (spotifyActivity.timestamps?.start) {
+      const startTime = spotifyActivity.timestamps.start;
+      const currentTime = Date.now();
+      // timestamps zaten milisaniye cinsinden
+      progress_ms = currentTime - startTime;
+      
+      // Eğer end timestamp varsa süreyi hesapla
+      if (spotifyActivity.timestamps.end) {
+        duration_ms = spotifyActivity.timestamps.end - startTime;
       }
-    }, 5000);
+    }
 
-    return () => clearInterval(interval);
-  }, [accessToken]);
+    // Spotify URL oluştur (sync_id varsa direkt track URL'i)
+    let songUrl: string | undefined;
+    if (spotifyActivity.sync_id) {
+      // sync_id Spotify track ID'sidir
+      songUrl = `https://open.spotify.com/track/${spotifyActivity.sync_id}`;
+    } else if (songName && artistName) {
+      // sync_id yoksa search URL oluştur
+      const searchQuery = encodeURIComponent(`${songName} ${artistName}`);
+      songUrl = `https://open.spotify.com/search/${searchQuery}`;
+    }
 
-  return { spotifyData, loading, error };
+    setSpotifyData({
+      isPlaying: true,
+      songName,
+      artistName,
+      albumName: spotifyActivity.assets?.large_text || undefined,
+      albumArt,
+      songUrl,
+      progress_ms,
+      duration_ms,
+    });
+  }, [discordUser]);
+
+  return { spotifyData, loading, error: null };
 };

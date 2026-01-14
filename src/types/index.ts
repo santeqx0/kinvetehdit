@@ -7,6 +7,17 @@ export interface DiscordActivity {
     start?: number;
     end?: number;
   } | null;
+  assets?: {
+    large_image?: string;
+    large_text?: string;
+    small_image?: string;
+    small_text?: string;
+  } | null;
+  sync_id?: string | null;
+  party?: {
+    id?: string;
+    size?: [number, number];
+  } | null;
 }
 
 export interface DiscordUser {

@@ -57,6 +57,7 @@ export const useLanyard = () => {
         if (lanyardData.success && lanyardData.data) {
           const user = lanyardData.data.discord_user;
           console.log("Discord user data:", user);
+          console.log("Banner URL:", bannerUrl);
           setDiscordUser({
             username: user.username || "Bilinmeyen Kullanıcı",
             discriminator: user.discriminator || "0000",
@@ -75,6 +76,8 @@ export const useLanyard = () => {
                 state: activity.state || null,
                 timestamps: activity.timestamps || null,
                 assets: activity.assets || null,
+                sync_id: activity.sync_id || null,
+                party: activity.party || null,
               })) || [],
             badges: ['nitro', 'active_developer', 'verified_developer'], 
           });
@@ -95,6 +98,24 @@ export const useLanyard = () => {
     };
 
     fetchLanyardData();
+
+    // Banner'ı periyodik olarak güncelle (her 30 saniyede bir)
+    const bannerUpdateInterval = setInterval(async () => {
+      try {
+        const bannerUrl = await fetchBannerFromDiscordLookup();
+        if (bannerUrl) {
+          setDiscordUser((prev) => {
+            if (prev && prev.banner_url !== bannerUrl) {
+              console.log("Banner updated:", bannerUrl);
+              return { ...prev, banner_url: bannerUrl };
+            }
+            return prev;
+          });
+        }
+      } catch (err) {
+        console.error("Error updating banner:", err);
+      }
+    }, 30000); // 30 saniye
 
     const ws = new WebSocket("wss://api.lanyard.rest/socket");
 
@@ -134,26 +155,62 @@ export const useLanyard = () => {
         data.d.user_id === DISCORD_ID
       ) {
         const user = data.d.discord_user;
-        setDiscordUser((prev) => ({
-          username: user.username || prev?.username || "Bilinmeyen Kullanıcı",
-          discriminator: user.discriminator || prev?.discriminator || "0000",
-          id: user.id || prev?.id,
-          avatar: user.avatar || prev?.avatar || null,
-          banner_url: prev?.banner_url || null, 
-          about:
-            data.d.activities?.find((a: any) => a.type === 4)?.state || prev?.about || null,
-          status: data.d.discord_status || "offline",
-          activities:
-            data.d.activities?.map((activity: any) => ({
-              type: activity.type,
-              name: activity.name,
-              details: activity.details || null,
-              state: activity.state || null,
-              timestamps: activity.timestamps || null,
-              assets: activity.assets || null,
-            })) || [],
-          badges: prev?.badges || ['nitro', 'active_developer', 'verified_developer'],
-        }));
+        console.log("WebSocket presence update:", user);
+        
+        // Banner'ı da güncelle
+        fetchBannerFromDiscordLookup().then((bannerUrl) => {
+          setDiscordUser((prev) => {
+            if (!prev) return prev;
+            return {
+              username: user.username || prev.username || "Bilinmeyen Kullanıcı",
+              discriminator: user.discriminator || prev.discriminator || "0000",
+              id: user.id || prev.id,
+              avatar: user.avatar || prev.avatar || null,
+              banner_url: bannerUrl || prev.banner_url || null,
+              about:
+                data.d.activities?.find((a: any) => a.type === 4)?.state || prev.about || null,
+              status: data.d.discord_status || "offline",
+              activities:
+                data.d.activities?.map((activity: any) => ({
+                  type: activity.type,
+                  name: activity.name,
+                  details: activity.details || null,
+                  state: activity.state || null,
+                  timestamps: activity.timestamps || null,
+                  assets: activity.assets || null,
+                  sync_id: activity.sync_id || null,
+                  party: activity.party || null,
+                })) || [],
+              badges: prev.badges || ['nitro', 'active_developer', 'verified_developer'],
+            };
+          });
+        }).catch((err) => {
+          console.error("Error fetching banner in WebSocket update:", err);
+          // Banner hatası olsa bile diğer bilgileri güncelle
+          setDiscordUser((prev) => {
+            if (!prev) return prev;
+            return {
+              username: user.username || prev.username || "Bilinmeyen Kullanıcı",
+              discriminator: user.discriminator || prev.discriminator || "0000",
+              id: user.id || prev.id,
+              avatar: user.avatar || prev.avatar || null,
+              banner_url: prev.banner_url || null,
+              about:
+                data.d.activities?.find((a: any) => a.type === 4)?.state || prev.about || null,
+              status: data.d.discord_status || "offline",
+              activities:
+                data.d.activities?.map((activity: any) => ({
+                  type: activity.type,
+                  name: activity.name,
+                  details: activity.details || null,
+                  state: activity.state || null,
+                  timestamps: activity.timestamps || null,
+                  assets: activity.assets || null,
+                })) || [],
+              badges: prev.badges || ['nitro', 'active_developer', 'verified_developer'],
+            };
+          });
+        });
       }
     };
 
@@ -171,6 +228,7 @@ export const useLanyard = () => {
     return () => {
       console.log("Cleaning up WebSocket");
       if (heartbeatInterval) clearInterval(heartbeatInterval);
+      if (bannerUpdateInterval) clearInterval(bannerUpdateInterval);
       ws.close();
     };
   }, []);
