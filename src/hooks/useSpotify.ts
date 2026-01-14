@@ -81,5 +81,5 @@ export const useSpotify = () => {
     });
   }, [discordUser]);
 
-  return { spotifyData, loading, error: null };
+  return { spotifyData, loading: false, error: null };
 };

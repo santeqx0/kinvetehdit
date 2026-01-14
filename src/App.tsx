@@ -36,12 +36,9 @@ const MainPage: React.FC = () => {
 
 function App() {
   const { effectiveTheme } = useTheme();
-  const { discordUser, loading: discordLoading, error: discordError } = useLanyard();
+  const { error: discordError } = useLanyard();
   const { spotifyData } = useSpotify();
-  const setDiscordUser = useAppStore((state) => state.setDiscordUser);
   const setSpotifyData = useAppStore((state) => state.setSpotifyData);
-
-  // Store zaten hook içinde güncelleniyor, burada gereksiz
 
   // Log Discord errors for debugging
   useEffect(() => {
@@ -52,9 +49,7 @@ function App() {
 
   // Update global state with Spotify data
   useEffect(() => {
-    if (spotifyData) {
-      setSpotifyData(spotifyData);
-    }
+    setSpotifyData(spotifyData);
   }, [spotifyData, setSpotifyData]);
 
   // Set theme class on the document

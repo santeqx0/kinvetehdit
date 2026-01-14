@@ -113,11 +113,14 @@ export const useLanyard = () => {
         } else {
           const errorMsg = lanyardData.error?.message || "Lanyard API returned unsuccessful response";
           console.error("Lanyard API error:", lanyardData);
-          throw new Error(errorMsg);
+          // Hata olsa bile loading'i kapat ki sayfa render edilsin
+          setLoading(false);
+          setError(errorMsg);
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Unknown error";
         console.error("Error fetching Lanyard data:", err);
+        // Hata olsa bile loading'i kapat ki sayfa render edilsin
         setError(errorMessage);
         setLoading(false);
       }
